@@ -215,13 +215,13 @@ class Corpus(object):
         
         for topic_index in range(number_of_topics):
             # Force topic 0 to incorporate prior
-            denominator = pseudo_count if topic_index == 1 else 0
+            denominator = pseudo_count if topic_index == 0 else 0
             for word_index in range(self.vocabulary_size):
                 for doc_index in range(self.number_of_documents):
                     denominator += self.term_doc_matrix[doc_index][word_index] * self.topic_prob[doc_index][topic_index][word_index]
                     
             for word_index, word in enumerate(self.vocabulary):    
-                numerator = pseudo_count * conjugate_prior[word] if topic_index == 1 else 0
+                numerator = pseudo_count * conjugate_prior[word] if topic_index == 0 else 0
                 for doc_index in range(self.number_of_documents):
                     numerator += self.term_doc_matrix[doc_index][word_index] * self.topic_prob[doc_index][topic_index][word_index]
                     
@@ -257,7 +257,7 @@ class Corpus(object):
         """
         Model topics.
         """
-        print ("EM iteration begins...")
+        # print ("EM iteration begins...")
         
         # build term-doc matrix
         self.build_term_doc_matrix()
@@ -279,7 +279,7 @@ class Corpus(object):
             self.maximization_step(number_of_topics)
             self.calculate_likelihood()
             
-        print("\n----------Likelihoods-----------")
+        print("\n---------- Likelihoods -----------")
         print(self.likelihoods)
         
         
@@ -289,7 +289,7 @@ class Corpus(object):
         """
         Model topics.
         """
-        print ("EM iteration begins...")
+        # print ("EM iteration begins...")
         
         # build term-doc matrix
         self.build_term_doc_matrix()
@@ -311,7 +311,7 @@ class Corpus(object):
             self.maximization_with_prior(number_of_topics, pseudo_count, conjugate_prior)
             self.calculate_likelihood()
             
-        print("\n----------Likelihoods----------- ")
+        print("\n---------- Likelihoods ----------- ")
         print(self.likelihoods)
         
 
@@ -320,27 +320,33 @@ def main():
     corpus = Corpus(documents_path)  # instantiate corpus
     corpus.build_corpus()
     corpus.build_vocabulary()
-    print(corpus.vocabulary)
-    print("Vocabulary size:" + str(len(corpus.vocabulary)))
-    print("Number of documents:" + str(len(corpus.documents)))
+    print('Vocabulary: ', corpus.vocabulary)
+    print("Vocabulary size: " + str(len(corpus.vocabulary)))
+    print("Number of documents: " + str(len(corpus.documents)))
     number_of_topics = 2
     max_iterations = 50
     epsilon = 0.001
     
-    pseudo_count = 10000
-    conjugate_prior = {'seattle':0.5, 'rainier':0.5}
-    conjugate_prior = defaultdict(lambda:0, conjugate_prior)  #set default value to 0
+    #################### Prior Parameters #########################
+    pseudo_count = 50000
+    conjugate_prior = {'mount':0.5, 'rainier':0.5}
+    ###############################################################
     
-    #corpus.plsa(number_of_topics, max_iterations, epsilon)
+    print('\n----------- Conjugate Prior -------------')
+    print('pseudo_count: ', pseudo_count)
+    print('Prior: ', conjugate_prior)
+    
+    conjugate_prior = defaultdict(lambda:0, conjugate_prior)  #set default value to 0
     corpus.plsa_with_prior(number_of_topics, max_iterations, epsilon, pseudo_count, conjugate_prior)
     
     np_array1 = np.array(corpus.document_topic_prob)
     np_array2 = np.array(corpus.topic_word_prob)
     #np.set_printoptions(formatter={'float_kind':'{:f}'.format})
     np.set_printoptions(suppress=True)
-    print('\n--------------Document-Topic-Prob---------------')
-    print(np_array1)
-    print('\n--------------Topic-Word_Prob---------------')
+    print('\n-------------- Document-Topic-Probability snippet ---------------')
+    print(np_array1[98:110])
+    #print('\n', np_array1.shape)
+    print('\n-------------- Topic-Word-Probability ---------------')
     print(np_array2)
     
 
