@@ -1,0 +1,7 @@
+mount 0.4
+rainier 0.3
+chicago 0.1
+
+willis 0.4
+tower 0.3
+seattle 0.1
